@@ -6,6 +6,20 @@ import (
 	"strings"
 )
 
+// Metadata are key/value pairs of arbitrary metadata
+type Metadata struct {
+	Name    string `json:"name"`
+	Persist bool   `json:"persist,string"`
+	Value   string `json:"value"`
+}
+
+// Persistence defines a persistence profile
+type Persistence struct {
+	Name      string `json:"name,omitempty"`
+	Partition string `json:"partition,omitempty"`
+	Default   string `json:"tmDefault,omitempty"`
+}
+
 // ServerSSLProfiles
 // Documentation: https://devcentral.f5.com/wiki/iControlREST.APIRef_tm_ltm_profile_server-ssl.ashx
 
@@ -336,20 +350,22 @@ type Nodes struct {
 // Node contains information about each individual node. You can use all
 // of these fields when modifying a node.
 type Node struct {
-	Name            string `json:"name,omitempty"`
-	AppService      string `json:"appService,omitempty"`
-	Partition       string `json:"partition,omitempty"`
-	FullPath        string `json:"fullPath,omitempty"`
-	Generation      int    `json:"generation,omitempty"`
-	Address         string `json:"address,omitempty"`
-	ConnectionLimit int    `json:"connectionLimit,omitempty"`
-	DynamicRatio    int    `json:"dynamicRatio,omitempty"`
-	Logging         string `json:"logging,omitempty"`
-	Monitor         string `json:"monitor,omitempty"`
-	RateLimit       string `json:"rateLimit,omitempty"`
-	Ratio           int    `json:"ratio,omitempty"`
-	Session         string `json:"session,omitempty"`
-	State           string `json:"state,omitempty"`
+	Name            string     `json:"name,omitempty"`
+	AppService      string     `json:"appService,omitempty"`
+	Partition       string     `json:"partition,omitempty"`
+	FullPath        string     `json:"fullPath,omitempty"`
+	Generation      int        `json:"generation,omitempty"`
+	Address         string     `json:"address,omitempty"`
+	Description     string     `json:"description,omitempty"`
+	Metadata        []Metadata `json:"metadata,omitempty"`
+	ConnectionLimit int        `json:"connectionLimit,omitempty"`
+	DynamicRatio    int        `json:"dynamicRatio,omitempty"`
+	Logging         string     `json:"logging,omitempty"`
+	Monitor         string     `json:"monitor,omitempty"`
+	RateLimit       string     `json:"rateLimit,omitempty"`
+	Ratio           int        `json:"ratio,omitempty"`
+	Session         string     `json:"session,omitempty"`
+	State           string     `json:"state,omitempty"`
 	FQDN            struct {
 		AddressFamily string `json:"addressFamily,omitempty"`
 		AutoPopulate  string `json:"autopopulate,omitempty"`
@@ -430,30 +446,31 @@ type Pools struct {
 // Pool contains information about each pool. You can use all of these
 // fields when modifying a pool.
 type Pool struct {
-	Name                   string `json:"name,omitempty"`
-	Description            string `json:"description,omitempty"`
-	Partition              string `json:"partition,omitempty"`
-	FullPath               string `json:"fullPath,omitempty"`
-	Generation             int    `json:"generation,omitempty"`
-	AllowNAT               string `json:"allowNat,omitempty"`
-	AllowSNAT              string `json:"allowSnat,omitempty"`
-	IgnorePersistedWeight  string `json:"ignorePersistedWeight,omitempty"`
-	IPTOSToClient          string `json:"ipTosToClient,omitempty"`
-	IPTOSToServer          string `json:"ipTosToServer,omitempty"`
-	LinkQoSToClient        string `json:"linkQosToClient,omitempty"`
-	LinkQoSToServer        string `json:"linkQosToServer,omitempty"`
-	LoadBalancingMode      string `json:"loadBalancingMode,omitempty"`
-	MinActiveMembers       int    `json:"minActiveMembers,omitempty"`
-	MinUpMembers           int    `json:"minUpMembers,omitempty"`
-	MinUpMembersAction     string `json:"minUpMembersAction,omitempty"`
-	MinUpMembersChecking   string `json:"minUpMembersChecking,omitempty"`
-	Monitor                string `json:"monitor,omitempty"`
-	QueueDepthLimit        int    `json:"queueDepthLimit,omitempty"`
-	QueueOnConnectionLimit string `json:"queueOnConnectionLimit,omitempty"`
-	QueueTimeLimit         int    `json:"queueTimeLimit,omitempty"`
-	ReselectTries          int    `json:"reselectTries,omitempty"`
-	ServiceDownAction      string `json:"serviceDownAction,omitempty"`
-	SlowRampTime           int    `json:"slowRampTime,omitempty"`
+	Name                   string     `json:"name,omitempty"`
+	Description            string     `json:"description,omitempty"`
+	Partition              string     `json:"partition,omitempty"`
+	FullPath               string     `json:"fullPath,omitempty"`
+	Generation             int        `json:"generation,omitempty"`
+	AllowNAT               string     `json:"allowNat,omitempty"`
+	AllowSNAT              string     `json:"allowSnat,omitempty"`
+	IgnorePersistedWeight  string     `json:"ignorePersistedWeight,omitempty"`
+	IPTOSToClient          string     `json:"ipTosToClient,omitempty"`
+	IPTOSToServer          string     `json:"ipTosToServer,omitempty"`
+	LinkQoSToClient        string     `json:"linkQosToClient,omitempty"`
+	LinkQoSToServer        string     `json:"linkQosToServer,omitempty"`
+	LoadBalancingMode      string     `json:"loadBalancingMode,omitempty"`
+	Metadata               []Metadata `json:"metadata,omitempty"`
+	MinActiveMembers       int        `json:"minActiveMembers,omitempty"`
+	MinUpMembers           int        `json:"minUpMembers,omitempty"`
+	MinUpMembersAction     string     `json:"minUpMembersAction,omitempty"`
+	MinUpMembersChecking   string     `json:"minUpMembersChecking,omitempty"`
+	Monitor                string     `json:"monitor,omitempty"`
+	QueueDepthLimit        int        `json:"queueDepthLimit,omitempty"`
+	QueueOnConnectionLimit string     `json:"queueOnConnectionLimit,omitempty"`
+	QueueTimeLimit         int        `json:"queueTimeLimit,omitempty"`
+	ReselectTries          int        `json:"reselectTries,omitempty"`
+	ServiceDownAction      string     `json:"serviceDownAction,omitempty"`
+	SlowRampTime           int        `json:"slowRampTime,omitempty"`
 
 	// Setting this field atomically updates all members.
 	Members *[]PoolMember `json:"members,omitempty"`
@@ -477,23 +494,24 @@ type poolMembers struct {
 // Pool Member contains information about each individual member in a pool. You can use all
 // of these fields when modifying a pool member.
 type PoolMember struct {
-	Name            string `json:"name,omitempty"`
-	Description     string `json:"description,omitempty"`
-	AppService      string `json:"appService,omitempty"`
-	Partition       string `json:"partition,omitempty"`
-	FullPath        string `json:"fullPath,omitempty"`
-	Generation      int    `json:"generation,omitempty"`
-	Address         string `json:"address,omitempty"`
-	ConnectionLimit int    `json:"connectionLimit,omitempty"`
-	DynamicRatio    int    `json:"dynamicRatio,omitempty"`
-	InheritProfile  string `json:"inheritProfile,omitempty"`
-	Logging         string `json:"logging,omitempty"`
-	Monitor         string `json:"monitor,omitempty"`
-	PriorityGroup   int    `json:"priorityGroup,omitempty"`
-	RateLimit       string `json:"rateLimit,omitempty"`
-	Ratio           int    `json:"ratio,omitempty"`
-	Session         string `json:"session,omitempty"`
-	State           string `json:"state,omitempty"`
+	Name            string     `json:"name,omitempty"`
+	Description     string     `json:"description,omitempty"`
+	AppService      string     `json:"appService,omitempty"`
+	Partition       string     `json:"partition,omitempty"`
+	FullPath        string     `json:"fullPath,omitempty"`
+	Generation      int        `json:"generation,omitempty"`
+	Address         string     `json:"address,omitempty"`
+	ConnectionLimit int        `json:"connectionLimit,omitempty"`
+	DynamicRatio    int        `json:"dynamicRatio,omitempty"`
+	InheritProfile  string     `json:"inheritProfile,omitempty"`
+	Logging         string     `json:"logging,omitempty"`
+	Metadata        []Metadata `json:"metadata,omitempty"`
+	Monitor         string     `json:"monitor,omitempty"`
+	PriorityGroup   int        `json:"priorityGroup,omitempty"`
+	RateLimit       string     `json:"rateLimit,omitempty"`
+	Ratio           int        `json:"ratio,omitempty"`
+	Session         string     `json:"session,omitempty"`
+	State           string     `json:"state,omitempty"`
 }
 
 // VirtualServers contains a list of all virtual servers on the BIG-IP system.
@@ -503,53 +521,48 @@ type VirtualServers struct {
 
 // VirtualServer contains information about each individual virtual server.
 type VirtualServer struct {
-	Name                     string `json:"name,omitempty"`
-	Partition                string `json:"partition,omitempty"`
-	FullPath                 string `json:"fullPath,omitempty"`
-	Generation               int    `json:"generation,omitempty"`
-	AddressStatus            string `json:"addressStatus,omitempty"`
-	AutoLastHop              string `json:"autoLastHop,omitempty"`
-	CMPEnabled               string `json:"cmpEnabled,omitempty"`
-	ConnectionLimit          int    `json:"connectionLimit,omitempty"`
-	Destination              string `json:"destination,omitempty"`
-	Description              string `json:"description,omitempty"`
-	Enabled                  bool   `json:"enabled,omitempty"`
-	GTMScore                 int    `json:"gtmScore,omitempty"`
-	IPForward                bool   `json:"ipForward,omitempty"`
-	IPProtocol               string `json:"ipProtocol,omitempty"`
-	Mask                     string `json:"mask,omitempty"`
-	Mirror                   string `json:"mirror,omitempty"`
-	MobileAppTunnel          string `json:"mobileAppTunnel,omitempty"`
-	NAT64                    string `json:"nat64,omitempty"`
-	Pool                     string `json:"pool,omitempty"`
-	RateLimit                string `json:"rateLimit,omitempty"`
-	RateLimitDestinationMask int    `json:"rateLimitDstMask,omitempty"`
-	RateLimitMode            string `json:"rateLimitMode,omitempty"`
-	RateLimitSourceMask      int    `json:"rateLimitSrcMask,omitempty"`
-	Source                   string `json:"source,omitempty"`
+	Name                     string        `json:"name,omitempty"`
+	Partition                string        `json:"partition,omitempty"`
+	FullPath                 string        `json:"fullPath,omitempty"`
+	Generation               int           `json:"generation,omitempty"`
+	AddressStatus            string        `json:"addressStatus,omitempty"`
+	AutoLastHop              string        `json:"autoLastHop,omitempty"`
+	CMPEnabled               string        `json:"cmpEnabled,omitempty"`
+	ConnectionLimit          int           `json:"connectionLimit,omitempty"`
+	Destination              string        `json:"destination,omitempty"`
+	Description              string        `json:"description,omitempty"`
+	Enabled                  bool          `json:"enabled,omitempty"`
+	FallbackPersistence      string        `json:"fallbackPersistence,omitempty"`
+	GTMScore                 int           `json:"gtmScore,omitempty"`
+	IPForward                bool          `json:"ipForward,omitempty"`
+	IPProtocol               string        `json:"ipProtocol,omitempty"`
+	Mask                     string        `json:"mask,omitempty"`
+	Metadata                 []Metadata    `json:"metadata,omitempty"`
+	Mirror                   string        `json:"mirror,omitempty"`
+	MobileAppTunnel          string        `json:"mobileAppTunnel,omitempty"`
+	NAT64                    string        `json:"nat64,omitempty"`
+	Pool                     string        `json:"pool,omitempty"`
+	Persistence              []Persistence `json:"persist,omitempty"`
+	RateLimit                string        `json:"rateLimit,omitempty"`
+	RateLimitDestinationMask int           `json:"rateLimitDstMask,omitempty"`
+	RateLimitMode            string        `json:"rateLimitMode,omitempty"`
+	RateLimitSourceMask      int           `json:"rateLimitSrcMask,omitempty"`
+	Source                   string        `json:"source,omitempty"`
 	SourceAddressTranslation struct {
 		Type string `json:"type,omitempty"`
 		Pool string `json:"pool,omitempty"`
 	} `json:"sourceAddressTranslation,omitempty"`
-	SourcePort       string     `json:"sourcePort,omitempty"`
-	SYNCookieStatus  string     `json:"synCookieStatus,omitempty"`
-	TranslateAddress string     `json:"translateAddress,omitempty"`
-	TranslatePort    string     `json:"translatePort,omitempty"`
-	VlansEnabled     bool       `json:"vlansEnabled,omitempty"`
-	VlansDisabled    bool       `json:"vlansDisabled,omitempty"`
-	VSIndex          int        `json:"vsIndex,omitempty"`
-	Vlans            []string   `json:"vlans,omitempty"`
-	Rules            []string   `json:"rules,omitempty"`
-	Profiles         []Profile  `json:"profiles,omitempty"`
-	Policies         []string   `json:"policies,omitempty"`
-	Metadata         []Metadata `json:"metadata,omitempty"`
-}
-
-// Metadata are key/value pairs of arbitrary metadata
-type Metadata struct {
-	Name    string `json:"name"`
-	Persist bool   `json:"persist,string"`
-	Value   string `json:"value"`
+	SourcePort       string    `json:"sourcePort,omitempty"`
+	SYNCookieStatus  string    `json:"synCookieStatus,omitempty"`
+	TranslateAddress string    `json:"translateAddress,omitempty"`
+	TranslatePort    string    `json:"translatePort,omitempty"`
+	VlansEnabled     bool      `json:"vlansEnabled,omitempty"`
+	VlansDisabled    bool      `json:"vlansDisabled,omitempty"`
+	VSIndex          int       `json:"vsIndex,omitempty"`
+	Vlans            []string  `json:"vlans,omitempty"`
+	Rules            []string  `json:"rules,omitempty"`
+	Profiles         []Profile `json:"profiles,omitempty"`
+	Policies         []string  `json:"policies,omitempty"`
 }
 
 // VirtualAddresses contains a list of all virtual addresses on the BIG-IP system.
@@ -953,6 +966,7 @@ type Monitor struct {
 	Interval       int
 	IPDSCP         int
 	ManualResume   bool
+	Metadata       []Metadata
 	MonitorType    string
 	Password       string
 	ReceiveColumn  string
@@ -971,32 +985,33 @@ type Monitor struct {
 }
 
 type monitorDTO struct {
-	Name           string `json:"name,omitempty"`
-	Partition      string `json:"partition,omitempty"`
-	FullPath       string `json:"fullPath,omitempty"`
-	Generation     int    `json:"generation,omitempty"`
-	ParentMonitor  string `json:"defaultsFrom,omitempty"`
-	Database       string `json:"database,omitempty"`
-	Description    string `json:"description,omitempty"`
-	Destination    string `json:"destination,omitempty"`
-	Interval       int    `json:"interval,omitempty"`
-	IPDSCP         int    `json:"ipDscp,omitempty"`
-	ManualResume   string `json:"manualResume,omitempty" bool:"enabled"`
-	MonitorType    string `json:"monitorType,omitempty"`
-	Password       string `json:"password,omitempty"`
-	ReceiveColumn  string `json:"recvColumn,omitempty"`
-	ReceiveRow     string `json:"recvRow,omitempty"`
-	ReceiveString  string `json:"recv,omitempty"`
-	ReceiveDisable string `json:"recvDisable,omitempty"`
-	Reverse        string `json:"reverse,omitempty" bool:"enabled"`
-	ResponseTime   int    `json:"responseTime"`
-	RetryTime      int    `json:"retryTime"`
-	SendString     string `json:"send,omitempty"`
-	TimeUntilUp    int    `json:"timeUntilUp,omitempty"`
-	Timeout        int    `json:"timeout,omitempty"`
-	Transparent    string `json:"transparent,omitempty" bool:"enabled"`
-	UpInterval     int    `json:"upInterval,omitempty"`
-	Username       string `json:"username,omitempty"`
+	Name           string     `json:"name,omitempty"`
+	Partition      string     `json:"partition,omitempty"`
+	FullPath       string     `json:"fullPath,omitempty"`
+	Generation     int        `json:"generation,omitempty"`
+	ParentMonitor  string     `json:"defaultsFrom,omitempty"`
+	Database       string     `json:"database,omitempty"`
+	Description    string     `json:"description,omitempty"`
+	Destination    string     `json:"destination,omitempty"`
+	Interval       int        `json:"interval,omitempty"`
+	IPDSCP         int        `json:"ipDscp,omitempty"`
+	ManualResume   string     `json:"manualResume,omitempty" bool:"enabled"`
+	Metadata       []Metadata `json:"metadata,omitempty"`
+	MonitorType    string     `json:"monitorType,omitempty"`
+	Password       string     `json:"password,omitempty"`
+	ReceiveColumn  string     `json:"recvColumn,omitempty"`
+	ReceiveRow     string     `json:"recvRow,omitempty"`
+	ReceiveString  string     `json:"recv,omitempty"`
+	ReceiveDisable string     `json:"recvDisable,omitempty"`
+	Reverse        string     `json:"reverse,omitempty" bool:"enabled"`
+	ResponseTime   int        `json:"responseTime"`
+	RetryTime      int        `json:"retryTime"`
+	SendString     string     `json:"send,omitempty"`
+	TimeUntilUp    int        `json:"timeUntilUp,omitempty"`
+	Timeout        int        `json:"timeout,omitempty"`
+	Transparent    string     `json:"transparent,omitempty" bool:"enabled"`
+	UpInterval     int        `json:"upInterval,omitempty"`
+	Username       string     `json:"username,omitempty"`
 }
 
 func (p *Monitor) MarshalJSON() ([]byte, error) {
