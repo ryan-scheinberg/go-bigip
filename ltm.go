@@ -2062,6 +2062,11 @@ func (b *BigIP) CreateIRule(name, rule string) error {
 	return b.post(irule, uriLtm, uriIRule)
 }
 
+// AddIRule creates a new irule on the BIG-IP system.
+func (b *BigIP) AddIRule(config *IRule) error {
+	return b.post(config, uriLtm, uriIRule)
+}
+
 // DeleteIRule removes an iRule from the system.
 func (b *BigIP) DeleteIRule(name string) error {
 	return b.delete(uriLtm, uriIRule, name)

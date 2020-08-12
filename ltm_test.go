@@ -77,6 +77,20 @@ func (s *LTMTestSuite) TestCreateIRule() {
 	assert.JSONEq(s.T(), `{"name":"rule1","apiAnonymous":"when CLIENT_ACCEPTED { log local0. \"test\"}"}`, s.LastRequestBody)
 }
 
+func (s *LTMTestSuite) TestAddIRule() {
+	config := &IRule{
+		Name:      "test-irule",
+		Partition: "Common",
+		Rule:   `when CLIENT_ACCEPTED { log local0. "test"}`,
+	}
+
+	s.Client.AddIRule(config)
+
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s", uriLtm, uriIRule), s.LastRequest.URL.Path)
+	assert.Equal(s.T(), "POST", s.LastRequest.Method)
+	assert.JSONEq(s.T(), `{"name":"test-irule","partition":"Common","apiAnonymous":"when CLIENT_ACCEPTED { log local0. \"test\"}"}`, s.LastRequestBody)
+}
+
 func (s *LTMTestSuite) TestModifyIRule() {
 	s.Client.ModifyIRule("rule1", &IRule{Rule: "modified"})
 
