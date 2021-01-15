@@ -182,13 +182,14 @@ func (b *BigIP) RefreshTokenSession(interval time.Duration) error {
 func (b *BigIP) iControlPath(parts []string) string {
 	var buffer bytes.Buffer
 	var lastPath int
+	var replacer = strings.NewReplacer("/", "~", "%", "%25")
 	if strings.HasPrefix(parts[len(parts)-1], "?") {
 		lastPath = len(parts) - 2
 	} else {
 		lastPath = len(parts) - 1
 	}
 	for i, p := range parts {
-		buffer.WriteString(strings.Replace(p, "/", "~", -1))
+		buffer.WriteString(replacer.Replace(p))
 		if i < lastPath {
 			buffer.WriteString("/")
 		}
