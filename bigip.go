@@ -110,7 +110,7 @@ func NewTokenSession(host, user, passwd, loginProviderName string, configOptions
 	b = NewSession(host, user, passwd, configOptions)
 	b.loginProvider = loginProviderName
 	
-	fmt.Println("HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenEpiry)
+	fmt.Println("HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenExpiry)
 	
 	err = b.login()
 
