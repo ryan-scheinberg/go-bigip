@@ -110,16 +110,6 @@ func NewTokenSession(host, user, passwd, loginProviderName string, configOptions
 	b = NewSession(host, user, passwd, configOptions)
 	b.loginProvider = loginProviderName
 	
-		Host          string
-	User          string
-	Password      string
-	Token         string    // if set, will be used instead of User/Password
-	TokenExpiry   time.Time // the token expiration time
-	Transport     *http.Transport
-	ConfigOptions *ConfigOptions
-	loginProvider string
-	startTime     time.Time // token start time
-	
 	fmt.Println("HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenEpiry)
 	
 	err = b.login()
