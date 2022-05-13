@@ -1,4 +1,4 @@
-module github.com/walkamongus/go-bigip
+module github.com/dereckmartin/go-bigip
 
 go 1.13
 
