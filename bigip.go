@@ -110,6 +110,7 @@ func NewTokenSession(host, user, passwd, loginProviderName string, configOptions
 	b = NewSession(host, user, passwd, configOptions)
 	b.loginProvider = loginProviderName
 	
+	// add timestamp
 	currentTime := time.Now()
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenExpiry)
 	
