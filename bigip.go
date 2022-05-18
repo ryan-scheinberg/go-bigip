@@ -112,6 +112,7 @@ func NewTokenSession(host, user, passwd, loginProviderName string, configOptions
 	
 	// add timestamp
 	currentTime := time.Now()
+	
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenExpiry)
 	
 	err = b.login()
@@ -141,7 +142,9 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 		req.SetBasicAuth(b.User, b.Password)
 	}
 
+	// timestamp
 	currentTime := time.Now()
+	
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] REQ -- ", options.Method, " ", url, " -- ", options.Body)
 
 	if len(options.ContentType) > 0 {
@@ -165,7 +168,9 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 		return data, errors.New(fmt.Sprintf("HTTP %d :: %s", res.StatusCode, string(data[:])))
 	}
 
+	// timestamp
 	currentTime = time.Now()
+	
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] Resp --", res.StatusCode, " -- ", string(data))
 	return data, nil
 }
