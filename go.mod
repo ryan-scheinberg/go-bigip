@@ -1,4 +1,4 @@
-module github.com/dereckmartin/go-bigip
+module github.com/ryan-scheinberg/go-bigip
 
 go 1.13
 
