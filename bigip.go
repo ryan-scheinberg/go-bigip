@@ -109,11 +109,11 @@ func NewTokenSession(host, user, passwd, loginProviderName string, configOptions
 
 	b = NewSession(host, user, passwd, configOptions)
 	b.loginProvider = loginProviderName
-	
+
 	// add timestamp
 	currentTime := time.Now()
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenExpiry)
-	
+
 	err = b.login()
 
 	return
@@ -169,7 +169,7 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 	// timestamp
 	currentTime = time.Now()
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] Resp --", res.StatusCode, " -- ", string(data))
-	
+
 	return data, nil
 }
 
@@ -180,12 +180,14 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 // token is generated with a new login.
 func (b *BigIP) RefreshTokenSession(interval time.Duration) error {
 	if b.TokenExpiry.Sub(time.Now()) <= 0 {
+		fmt.Println("Debug: Refresh--Extend token timeout")
 		return b.login()
 	}
 	if err := b.increaseTokenTimout(interval); err != nil {
 		fmt.Println(err)
 		return b.login()
 	}
+	fmt.Println("Debug: Refresh called but token had time.  error")
 	return nil
 }
 
