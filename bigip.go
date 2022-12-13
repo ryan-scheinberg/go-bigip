@@ -179,16 +179,11 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 // If the token is already expired or if the above refresh fails, a new
 // token is generated with a new login.
 func (b *BigIP) RefreshTokenSession(interval time.Duration) error {
-	if b.TokenExpiry.Sub(time.Now()) <= 0 {
-		fmt.Println("Debug: Refresh login since token is valid")
+	if b.TokenExpiry.Sub(time.Now()) <= time.Second {
+		fmt.Println("Debug: Refresh login since token is invalid")
 		return b.login()
 	}
-	if err := b.increaseTokenTimout(interval); err != nil {
-		fmt.Println("Debug: Refresh extend token timeout failed with error")
-		fmt.Println(err)
-		return b.login()
-	}
-	fmt.Println("Debug: Refresh extend token timeout succeeded")
+	fmt.Println("Debug: Use the old token during its lifespan")
 	return nil
 }
 
@@ -523,6 +518,7 @@ func (b *BigIP) login() error {
 	return nil
 }
 
+// removed due to https://support.f5.com/csp/article/K91334123
 // increaseTokenTimeout increases token timeout by interval.
 //
 // if it exceeds maxTokenTimeout an error is returned.
