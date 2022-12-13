@@ -556,6 +556,7 @@ func (b *BigIP) increaseTokenTimout(interval time.Duration) error {
 		Body:        string(refreshJSON),
 		ContentType: "application/json",
 	}
+	time.Sleep(1 * time.Second)
 	resp, err := b.APICall(req)
 	if err != nil {
 	 	fmt.Println("Debug: error in token refresh patch API call")
