@@ -109,11 +109,11 @@ func NewTokenSession(host, user, passwd, loginProviderName string, configOptions
 
 	b = NewSession(host, user, passwd, configOptions)
 	b.loginProvider = loginProviderName
-	
+
 	// add timestamp
 	currentTime := time.Now()
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] HOST: ", b.Host, " User: ", b.User , " Token: ", b.Token, " TokenExpiry: ", b.TokenExpiry)
-	
+
 	err = b.login()
 
 	return
@@ -169,7 +169,7 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 	// timestamp
 	currentTime = time.Now()
 	fmt.Println("[", currentTime.Format("2006-01-02 15:04:05.000000"), "] Resp --", res.StatusCode, " -- ", string(data))
-	
+
 	return data, nil
 }
 
@@ -179,13 +179,11 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 // If the token is already expired or if the above refresh fails, a new
 // token is generated with a new login.
 func (b *BigIP) RefreshTokenSession(interval time.Duration) error {
-	if b.TokenExpiry.Sub(time.Now()) <= 0 {
+	if b.TokenExpiry.Sub(time.Now()) <= time.Second {
+		fmt.Println("Debug: Refresh login since token is invalid")
 		return b.login()
 	}
-	if err := b.increaseTokenTimout(interval); err != nil {
-		fmt.Println(err)
-		return b.login()
-	}
+	fmt.Println("Debug: Use the old token during its lifespan")
 	return nil
 }
 
@@ -256,7 +254,7 @@ func (b *BigIP) getForEntity(e interface{}, path ...string) (error, bool) {
 		URL:         b.iControlPath(path),
 		ContentType: "application/json",
 	}
-
+        fmt.Println("Debug: Running get")
 	resp, err := b.APICall(req)
 	if err != nil {
 		var reqError RequestError
@@ -495,6 +493,7 @@ func (b *BigIP) login() error {
 
 	resp, err := b.APICall(req)
 	if err != nil {
+		fmt.Println("Debug: Error in login API call")
 		return err
 	}
 
@@ -505,6 +504,7 @@ func (b *BigIP) login() error {
 	var aresp authResp
 	err = json.Unmarshal(resp, &aresp)
 	if err != nil {
+		fmt.Println("Debug: Error in login json")
 		return err
 	}
 
@@ -514,10 +514,11 @@ func (b *BigIP) login() error {
 
 	b.Token = aresp.Token.Token
 	b.TokenExpiry = time.Unix(int64(aresp.Token.Expiration/microToSeconds), 0)
-
+	fmt.Println("Debug: Login succeeded")
 	return nil
 }
 
+// removed due to https://support.f5.com/csp/article/K91334123
 // increaseTokenTimeout increases token timeout by interval.
 //
 // if it exceeds maxTokenTimeout an error is returned.
@@ -551,8 +552,10 @@ func (b *BigIP) increaseTokenTimout(interval time.Duration) error {
 		Body:        string(refreshJSON),
 		ContentType: "application/json",
 	}
+	time.Sleep(1 * time.Second)
 	resp, err := b.APICall(req)
 	if err != nil {
+	 	fmt.Println("Debug: error in token refresh patch API call")
 		return err
 	}
 
@@ -563,11 +566,13 @@ func (b *BigIP) increaseTokenTimout(interval time.Duration) error {
 	var rresp refreshResp
 	err = json.Unmarshal(resp, &rresp)
 	if err != nil {
+		fmt.Println("Debug: Error in refresh json unmarshal")
 		return err
 	}
 	if rresp.Expiration == 0 {
 		return fmt.Errorf("unable to refresh authentication token")
 	}
 	b.TokenExpiry = time.Unix(int64(rresp.Expiration/microToSeconds), 0)
+	fmt.Println("Debug: Refresh succeeded")
 	return nil
 }
