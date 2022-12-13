@@ -180,14 +180,15 @@ func (b *BigIP) APICall(options *APIRequest) ([]byte, error) {
 // token is generated with a new login.
 func (b *BigIP) RefreshTokenSession(interval time.Duration) error {
 	if b.TokenExpiry.Sub(time.Now()) <= 0 {
-		fmt.Println("Debug: Refresh--Extend token timeout")
+		fmt.Println("Debug: Refresh login since token is valid")
 		return b.login()
 	}
 	if err := b.increaseTokenTimout(interval); err != nil {
+		fmt.Println("Debug: Refresh extend token timeout failed with error")
 		fmt.Println(err)
 		return b.login()
 	}
-	fmt.Println("Debug: Refresh called but token had time.  error")
+	fmt.Println("Debug: Refresh extend token timeout succeeded")
 	return nil
 }
 
@@ -258,7 +259,7 @@ func (b *BigIP) getForEntity(e interface{}, path ...string) (error, bool) {
 		URL:         b.iControlPath(path),
 		ContentType: "application/json",
 	}
-
+        fmt.Println("Debug: Running get")
 	resp, err := b.APICall(req)
 	if err != nil {
 		var reqError RequestError
@@ -497,6 +498,7 @@ func (b *BigIP) login() error {
 
 	resp, err := b.APICall(req)
 	if err != nil {
+		fmt.Println("Debug: Error in login API call")
 		return err
 	}
 
@@ -507,6 +509,7 @@ func (b *BigIP) login() error {
 	var aresp authResp
 	err = json.Unmarshal(resp, &aresp)
 	if err != nil {
+		fmt.Println("Debug: Error in login json")
 		return err
 	}
 
@@ -516,7 +519,7 @@ func (b *BigIP) login() error {
 
 	b.Token = aresp.Token.Token
 	b.TokenExpiry = time.Unix(int64(aresp.Token.Expiration/microToSeconds), 0)
-
+	fmt.Println("Debug: Login succeeded")
 	return nil
 }
 
@@ -555,6 +558,7 @@ func (b *BigIP) increaseTokenTimout(interval time.Duration) error {
 	}
 	resp, err := b.APICall(req)
 	if err != nil {
+	 	fmt.Println("Debug: error in token refresh patch API call")
 		return err
 	}
 
@@ -565,11 +569,13 @@ func (b *BigIP) increaseTokenTimout(interval time.Duration) error {
 	var rresp refreshResp
 	err = json.Unmarshal(resp, &rresp)
 	if err != nil {
+		fmt.Println("Debug: Error in refresh json unmarshal")
 		return err
 	}
 	if rresp.Expiration == 0 {
 		return fmt.Errorf("unable to refresh authentication token")
 	}
 	b.TokenExpiry = time.Unix(int64(rresp.Expiration/microToSeconds), 0)
+	fmt.Println("Debug: Refresh succeeded")
 	return nil
 }
