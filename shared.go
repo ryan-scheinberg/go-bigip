@@ -11,6 +11,7 @@ import (
 const (
 	uriClientSSL       = "client-ssl"
 	uriDatagroup       = "data-group"
+	uriFastL4          = "fastl4"
 	uriHttp            = "http"
 	uriHttpCompression = "http-compression"
 	uriIRule           = "rule"
