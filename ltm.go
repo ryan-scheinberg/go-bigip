@@ -259,6 +259,63 @@ type UdpProfile struct {
 	ProxyMss              string `json:"proxyMss,omitempty"`
 }
 
+// FastL4Profiles contains a list of every fastl4 profile on the BIG-IP system.
+type FastL4Profiles struct {
+	FastL4Profiles []FastL4Profile `json:"items"`
+}
+
+type FastL4Profile struct {
+	AppService              string `json:"appService,omitempty"`
+	ClientTimeout           int    `json:"clientTimeout,omitempty"`
+	DefaultsFrom            string `json:"defaultsFrom,omitempty"`
+	Description             string `json:"description,omitempty"`
+	ExplicitFlowMigration   string `json:"explicitFlowMigration,omitempty"`
+	HardwareSynCookie       string `json:"hardwareSynCookie,omitempty"`
+	IdleTimeout             string `json:"idleTimeout,omitempty"`
+	IpDfMode                string `json:"ipDfMode,omitempty"`
+	IpTosToClient           string `json:"ipTosToClient,omitempty"`
+	IpTosToServer           string `json:"ipTosToServer,omitempty"`
+	IpTtlMode               string `json:"ipTtlMode,omitempty"`
+	IpTtlV4                 int    `json:"ipTtlV4,omitempty"`
+	IpTtlV6                 int    `json:"ipTtlV6,omitempty"`
+	KeepAliveInterval       string `json:"keepAliveInterval,omitempty"`
+	LateBinding             string `json:"lateBinding,omitempty"`
+	LinkQosToClient         string `json:"linkQosToClient,omitempty"`
+	LinkQosToServer         string `json:"linkQosToServer,omitempty"`
+	LooseClose              string `json:"looseClose,omitempty"`
+	LooseInitialization     string `json:"looseInitialization,omitempty"`
+	MssOverride             int    `json:"mssOverride,omitempty"`
+	Name                    string `json:"name,omitempty"`
+	TmPartition             string `json:"tmPartition,omitempty"`
+	PriorityToClient        string `json:"priorityToClient,omitempty"`
+	PriorityToServer        string `json:"priorityToServer,omitempty"`
+	PvaAcceleration         string `json:"pvaAcceleration,omitempty"`
+	PvaDynamicClientPackets int    `json:"pvaDynamicClientPackets,omitempty"`
+	PvaDynamicServerPackets int    `json:"pvaDynamicServerPackets,omitempty"`
+	PvaFlowAging            string `json:"pvaFlowAging,omitempty"`
+	PvaFlowEvict            string `json:"pvaFlowEvict,omitempty"`
+	PvaOffloadDynamic       string `json:"pvaOffloadDynamic,omitempty"`
+	PvaOffloadState         string `json:"pvaOffloadState,omitempty"`
+	ReassembleFragments     string `json:"reassembleFragments,omitempty"`
+	ReceiveWindowSize       int    `json:"receiveWindowSize,omitempty"`
+	ResetOnTimeout          string `json:"resetOnTimeout,omitempty"`
+	RttFromClient           string `json:"rttFromClient,omitempty"`
+	RttFromServer           string `json:"rttFromServer,omitempty"`
+	ServerSack              string `json:"serverSack,omitempty"`
+	ServerTimestamp         string `json:"serverTimestamp,omitempty"`
+	SoftwareSynCookie       string `json:"softwareSynCookie,omitempty"`
+	SynCookieEnable         string `json:"synCookieEnable,omitempty"`
+	SynCookieMss            int    `json:"synCookieMss,omitempty"`
+	SynCookieWhitelist      string `json:"synCookieWhitelist,omitempty"`
+	TcpCloseTimeout         string `json:"tcpCloseTimeout,omitempty"`
+	TcpGenerateIsn          string `json:"tcpGenerateIsn,omitempty"`
+	TcpHandshakeTimeout     string `json:"tcpHandshakeTimeout,omitempty"`
+	TcpStripSack            string `json:"tcpStripSack,omitempty"`
+	TcpTimestampMode        string `json:"tcpTimestampMode,omitempty"`
+	TcpWscaleMode           string `json:"tcpWscaleMode,omitempty"`
+	TimeoutRecovery         string `json:"timeoutRecovery,omitempty"`
+}
+
 type HttpProfiles struct {
 	HttpProfiles []HttpProfile `json:"items"`
 }
@@ -1308,6 +1365,56 @@ func (b *BigIP) ModifyUdpProfile(name string, config *UdpProfile) error {
 	return b.put(config, uriLtm, uriProfile, uriUdp, name)
 }
 
+// FastL4Profiles returns a list of FastL4 profiles
+func (b *BigIP) FastL4Profiles() (*FastL4Profiles, error) {
+	var fastl4Profiles FastL4Profiles
+	err, _ := b.getForEntity(&fastl4Profiles, uriLtm, uriProfile, uriFastL4)
+	if err != nil {
+		return nil, err
+	}
+
+	return &fastl4Profiles, nil
+}
+
+func (b *BigIP) GetFastL4Profile(name string) (*FastL4Profile, error) {
+	var fastl4Profile FastL4Profile
+	err, ok := b.getForEntity(&fastl4Profile, uriLtm, uriProfile, uriFastL4, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return nil, nil
+	}
+
+	return &fastl4Profile, nil
+}
+
+// CreateFastL4Profile creates a new fastl4 profile on the BIG-IP system.
+func (b *BigIP) CreateFastL4Profile(name string, parent string) error {
+	config := &FastL4Profile{
+		Name:         name,
+		DefaultsFrom: parent,
+	}
+
+	return b.post(config, uriLtm, uriProfile, uriFastL4)
+}
+
+func (b *BigIP) AddFastL4Profile(config *FastL4Profile) error {
+	return b.post(config, uriLtm, uriProfile, uriFastL4)
+}
+
+// DeleteFastL4Profile removes a fastl4 profile.
+func (b *BigIP) DeleteFastL4Profile(name string) error {
+	return b.delete(uriLtm, uriProfile, uriFastL4, name)
+}
+
+// ModifyFastL4Profile allows you to change any attribute of a fastl4 profile.
+// Fields that can be modified are referenced in the FastL4Profile struct.
+func (b *BigIP) ModifyFastL4Profile(name string, config *FastL4Profile) error {
+	return b.put(config, uriLtm, uriProfile, uriFastL4, name)
+}
+
 // HttpProfiles returns a list of HTTP profiles
 func (b *BigIP) HttpProfiles() (*HttpProfiles, error) {
 	var httpProfiles HttpProfiles
@@ -1867,7 +1974,7 @@ func (b *BigIP) VirtualServerProfiles(vs string) (*Profiles, error) {
 	return &p, nil
 }
 
-//Get the names of policies associated with a particular virtual server
+// Get the names of policies associated with a particular virtual server
 func (b *BigIP) VirtualServerPolicyNames(vs string) ([]string, error) {
 	var policies Policies
 	err, _ := b.getForEntity(&policies, uriLtm, uriVirtual, vs, "policies")
@@ -2088,7 +2195,7 @@ func (b *BigIP) Policies() (*Policies, error) {
 	return &p, nil
 }
 
-//Load a fully policy definition. Policies seem to be best dealt with as one big entity.
+// Load a fully policy definition. Policies seem to be best dealt with as one big entity.
 func (b *BigIP) GetPolicy(name string) (*Policy, error) {
 	var p Policy
 	err, ok := b.getForEntity(&p, uriLtm, uriPolicy, name, policyVersionSuffix)
@@ -2138,19 +2245,19 @@ func normalizePolicy(p *Policy) {
 	}
 }
 
-//Create a new policy. It is not necessary to set the Ordinal fields on subcollections.
+// Create a new policy. It is not necessary to set the Ordinal fields on subcollections.
 func (b *BigIP) CreatePolicy(p *Policy) error {
 	normalizePolicy(p)
 	return b.post(p, uriLtm, uriPolicy, policyVersionSuffix)
 }
 
-//Update an existing policy.
+// Update an existing policy.
 func (b *BigIP) UpdatePolicy(name string, p *Policy) error {
 	normalizePolicy(p)
 	return b.put(p, uriLtm, uriPolicy, name, policyVersionSuffix)
 }
 
-//Delete a policy by name.
+// Delete a policy by name.
 func (b *BigIP) DeletePolicy(name string) error {
 	return b.delete(uriLtm, uriPolicy, name, policyVersionSuffix)
 }
